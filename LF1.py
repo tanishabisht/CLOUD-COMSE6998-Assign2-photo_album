@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     open_search_url = OPENSEARCH_ENDPOINT + s3_img
     
     # === REKOGNITION ===
-    reko = boto3.client('rekognition')
+    reko = boto3.client('rekognition', region_name='us-east-1')
     s3_client = boto3.client('s3')
     reko_labels = reko.detect_labels(Image={'S3Object':{'Bucket':s3_bucket,'Name':s3_img}})
     print("reko_labels: ", reko_labels)
@@ -51,4 +51,3 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': json.dumps('Hello from LF1 Function! The task is to index the photos from S3 bucket in OpenSearch')
     }
-

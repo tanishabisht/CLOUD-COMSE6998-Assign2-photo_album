@@ -19,7 +19,7 @@
         - Rekognition detects labels in image
         - S3 SDK’s headObject method > retrieve the S3 metadata created at the object’s upload time > get x-amz-meta-customLabels metadata field if it exists > create json array of all labels from Rekognition and S3 SDK's headobject
         - Save the json in OpenSearch `photos`
-            ```json
+            ```js
                 {
                     “objectKey”: “my-photo.jpg”,
                     “bucket”: “my-photo-bucket”,
@@ -32,4 +32,5 @@
                     ]
                 }
             ```
+    - NOTE: LF1 function will be imported as a zip file -> for ease you can import the zip file ["deployment.zip"](./deployment.zip)
 
