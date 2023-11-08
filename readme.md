@@ -32,5 +32,27 @@
                     ]
                 }
             ```
+    - Give OpenSearch and Lambda Function permission to use each other
+        - In Lambda Function > Configuration > Role name > Copy the Lambda function Role ARN
+        - In OpenSearch > domains > index_name > Security configuration > Edit > Set IAM ARN as master user > Paste the Lambda function Role ARN > Only use fine-grained access control > Save changes
     - NOTE: LF1 function will be imported as a zip file -> for ease you can import the zip file ["deployment.zip"](./deployment.zip)
 
+3. Search
+    - Create a Lambda Function (LF2) `search-photos`
+    - Create Lex Bot `search-bot`
+        - CONFIGURATIONS: name: search-bot > IAMPermissions: Create a role with basic Amazon Lex permissions > COPPA: No > Done
+    - Create a new Intent 
+        - name: SearchIntent1Key
+        - description: extract one key from the user
+        - Add a slot => name: `key1`; type: `alphanumeric`; prompt: `Enter a key`
+        - Add sample utterances => `show me {key1}` ... `show me photos with {key1} in them` ... `I would like to see some {key1} photos` ... `could you show me photos of {key1}`
+    - Create another Intent for two keys
+        - name: SearchIntent2Key
+        - description: extract two keys from the user
+        - Add a slot => name: `key1`; type: `alphanumeric`; prompt: `Enter a key1`
+        - Add a slot => name: `key2`; type: `alphanumeric`; prompt: `Enter a key2`
+        - Add sample utterances => `show me {key1} and {key2}` ... `show me photos with {key1} and {key2} in them` ... `I would like to see some {key1} and {key2} photos` ... `could you show me photos of {key1} and {key2}`
+    - Implement LF2 function
+        - STEP 1: GIVEN QUERY BY USER
+        - STEP 2: REMOVE AMBIGUITY SUCH THAT OUR LEX RETURNS KEYWORDS
+        - STEP 3: SEARCH OPENSEARCH FOR KEYWORDS AND RETURN PICTURES

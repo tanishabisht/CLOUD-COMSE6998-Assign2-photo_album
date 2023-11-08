@@ -2,8 +2,33 @@ import json
 import boto3
 import time
 import requests
+from opensearchpy import OpenSearch, RequestsHttpConnection
+from requests_aws4auth import AWS4Auth
 
 OPENSEARCH_ENDPOINT = "https://search-photos-lwaf6zvsq74hrr6gmapeqmbnzm.us-east-1.es.amazonaws.com/photos/"
+REGION = 'us-east-1'
+HOST = 'search-photos-lwaf6zvsq74hrr6gmapeqmbnzm.us-east-1.es.amazonaws.com'
+INDEX = 'photos'
+
+def get_awsauth(region, service):
+    cred = boto3.Session().get_credentials()
+    return AWS4Auth(cred.access_key,
+        cred.secret_key,
+        region,
+        service,
+        session_token=cred.token
+    )
+
+# DEFINING CLIENTS
+s3_client = boto3.client('s3')
+reko_client = boto3.client('rekognition', region_name=REGION)
+os_client = OpenSearch(
+    hosts=[{ 'host': HOST, 'port': 443 }],
+    http_auth=get_awsauth(REGION, 'es'),
+    use_ssl=True,
+    verify_certs=True,
+    connection_class=RequestsHttpConnection
+)
 
 def lambda_handler(event, context):
     print("event: ", event)
@@ -12,12 +37,8 @@ def lambda_handler(event, context):
     s3_bucket = event["Records"][0]["s3"]["bucket"]["name"]
     s3_img = event["Records"][0]["s3"]["object"]["key"]
     
-    open_search_url = OPENSEARCH_ENDPOINT + s3_img
-    
     # === REKOGNITION ===
-    reko = boto3.client('rekognition', region_name='us-east-1')
-    s3_client = boto3.client('s3')
-    reko_labels = reko.detect_labels(Image={'S3Object':{'Bucket':s3_bucket,'Name':s3_img}})
+    reko_labels = reko_client.detect_labels(Image={'S3Object':{'Bucket':s3_bucket,'Name':s3_img}})
     print("reko_labels: ", reko_labels)
     
     # === S3 -> X-AMZ ===
@@ -30,8 +51,9 @@ def lambda_handler(event, context):
     else:
         print("x-amz-meta-customLabels metadata field not found.")
     
-    # === ADD OBJECT TO OPENSEARCH ===
+    # === OPENSEARCH --> ADD DATA ===
     try:
+        # extract data to push to opensearch
         data = {}
         data["objectKey"] = s3_img
         data["bucket"] = s3_bucket
@@ -40,9 +62,12 @@ def lambda_handler(event, context):
         for label in reko_labels['Labels']:
             data['labels'].append(label['Name'])
         json_data = json.dumps(data)
-        headers = { "Content-Type": "application/json" }
-        r = requests.post(url = open_search_url, data = json_data, headers = headers)
-        print("opensource request: ", r)
+        print("opensource data stored: ", json_data)
+        
+        # post request
+        os_res = os_client.index(index=INDEX, body=json_data)
+        print("opensource request: ", os_res)
+        
     except Exception as e:
         print("Error: "+ str(e))
     
