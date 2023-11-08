@@ -56,3 +56,14 @@
         - STEP 1: GIVEN QUERY BY USER
         - STEP 2: REMOVE AMBIGUITY SUCH THAT OUR LEX RETURNS KEYWORDS
         - STEP 3: SEARCH OPENSEARCH FOR KEYWORDS AND RETURN PICTURES
+    - Give OpenSearch and Lambda Function permission to use each other
+        - In Lambda Function > Configuration > Role name > Copy the Lambda function Role ARN
+        - In OpenSearch > domains > index_name > Security configuration > Edit > Set IAM ARN as master user > Paste the Lambda function Role ARN > Only use fine-grained access control > Save changes
+
+4. API GateWay
+
+5. Frontend
+    - Write a frontend code to
+        - [Index.html](./frontend/index.html): the main landing page
+        - [Gallery.html](./frontend/gallery.html): This is to search in the gallery for our keywords
+        - [Upload.html](./frontend/upload.html): This is to upload image to gallery

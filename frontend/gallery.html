@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>VisualVault | Gallery</title>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="index.html">VisualVault</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="upload.html">Upload Image</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="gallery.html">Search Image</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container mt-4">
+        <div class="mb-5">
+            <h2>Welcome to our Gallery Page</h2>
+            <p>Please write or voice record what images you are looking for</p>
+        </div>
+
+        <div class="mb-5">
+            <div class="input-group mb-3">
+                <input id="searchInput" type="text" class="form-control" placeholder="Search for a photo here" aria-label="Search for a photo here" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="startVoiceBtn">Start Voice Search</button>
+                    <button type="button" class="btn btn-outline-secondary" id="stopVoiceBtn" style="display: none;">Stop Voice Search</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- JavaScript Code -->
+    <script>
+
+        // initialize
+        const startBtn = document.getElementById('startVoiceBtn');
+        const stopBtn = document.getElementById('stopVoiceBtn');
+        const searchInput = document.getElementById('searchInput');
+        let recognition;
+    
+        // Add event listener on start voice button
+        startBtn.addEventListener('click', () => {
+            startVoiceRecognition();
+        });
+    
+        // Add event listener on stop voice button
+        stopBtn.addEventListener('click', () => {
+            stopVoiceRecognition();
+        });
+    
+        // function call on clicking start voice button
+        function startVoiceRecognition() {
+            recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition.lang = 'en-US'; // Set the language for recognition
+        
+            recognition.onstart = () => {
+                searchInput.value = 'Listening...';
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline';
+            };
+        
+            recognition.onresult = (event) => {
+                const result = event.results[0][0].transcript;
+                searchInput.value = result;
+                console.log("result: ", result);
+            };
+        
+            recognition.onend = () => {
+                startBtn.style.display = 'inline';
+                stopBtn.style.display = 'none';
+            };
+        
+            recognition.start();
+        }
+    
+        // function call on clicking stop voice button
+        function stopVoiceRecognition() {
+            recognition.stop();
+        }
+    </script>
+</body>
+</html>
