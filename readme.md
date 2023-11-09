@@ -60,10 +60,26 @@
         - In Lambda Function > Configuration > Role name > Copy the Lambda function Role ARN
         - In OpenSearch > domains > index_name > Security configuration > Edit > Set IAM ARN as master user > Paste the Lambda function Role ARN > Only use fine-grained access control > Save changes
 
-4. API GateWay
-
 5. Frontend
     - Write a frontend code to
         - [Index.html](./frontend/index.html): the main landing page
         - [Gallery.html](./frontend/gallery.html): This is to search in the gallery for our keywords
         - [Upload.html](./frontend/upload.html): This is to upload image to gallery
+    - Deploy FE in S3 bucket
+        - CONFIGURATIONS: type bucket name (photo-gallery-fe) > Block all public access > Create
+        - Go to your S3 bucket you just created > Upload files
+        - Permissions > Bucket policy > Write bucket policy as below
+            ```json
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Sid": "PublicReadGetObject",
+                        "Effect": "Allow",
+                        "Principal": "*",
+                        "Action": "s3:GetObject",
+                        "Resource": "arn:aws:s3:::photo-gallery-fe/*"
+                    }
+                ]
+            }
+            ```
