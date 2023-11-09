@@ -69,6 +69,11 @@
         - API Gateway > APIs > Resources - AI Photo Search > Click on PUT (/upload/{bucket}/{filename} - PUT - Method execution) > Edit Integration > AWS service > AWS Region: us-east-1 > AWS service: S3 > AWS subdomain: null > HTTP method: PUT > Use path override: upload/{bucket}/{filename} > Execution role: PASTE YOUR ARN ROLE HERE > URL path parameters > `bucket:method.request.path.bucket; filename:method.request.path.filename`
     - GET: extract data from opensearch and display
         - API Gateway > APIs > Resources - AI Photo Search > Click on GET > Edit Integration > Lambda function > `search-photos` > Lambda proxy integration: enable this > URL query string parameters: `q:method.request.querystring.q`
+    - Deployment
+        - Deploy API > Select new stage > Name the new stage > Deploy
+        - Stages > (Name of the stage) > Stage actions > Generate SDK > Platform: JavaScript
+        - Copy paste the [apigClient.js](./frontend/apigClient.js) and [lib/](./frontend/lib/) in your [frontend directory](./frontend/)
+
 
 5. Frontend
     - Write a frontend code to
