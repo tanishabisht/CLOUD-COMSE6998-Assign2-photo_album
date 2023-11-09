@@ -81,7 +81,7 @@ def lambda_handler(event, context):
     print("context: ", context)
     
     # STEP 1: GIVEN QUERY BY USER
-    text_from_user = event['user']
+    text_from_user = event['queryStringParameters']['q']
     
     # STEP 2: REMOVE AMBIGUITY SUCH THAT OUR LEX RETURNS KEYWORDS
     keys = response_from_lex(text_from_user)

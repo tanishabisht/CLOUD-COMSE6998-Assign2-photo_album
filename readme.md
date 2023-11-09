@@ -60,6 +60,16 @@
         - In Lambda Function > Configuration > Role name > Copy the Lambda function Role ARN
         - In OpenSearch > domains > index_name > Security configuration > Edit > Set IAM ARN as master user > Paste the Lambda function Role ARN > Only use fine-grained access control > Save changes
 
+4. API GateWay
+    - Create REST API > REST > Import from Swagger or Open API 3 > Paste your [Swagger Code](./swagger.yaml)
+    - Create a new role that allows API Gateway to push logs to Cloudwatch Logs
+        - Identity and Access Management (IAM) > Roles > Create Role > AWS Service > API Gateway (Allows API Gateway to push logs to CloudWatch Logs) > Give role name
+        - Copy the ARN of the Role
+    - PUT: add image to S3
+        - API Gateway > APIs > Resources - AI Photo Search > Click on PUT (/upload/{bucket}/{filename} - PUT - Method execution) > Edit Integration > AWS service > AWS Region: us-east-1 > AWS service: S3 > AWS subdomain: null > HTTP method: PUT > Use path override: upload/{bucket}/{filename} > Execution role: PASTE YOUR ARN ROLE HERE > URL path parameters > `bucket:method.request.path.bucket; filename:method.request.path.filename`
+    - GET: extract data from opensearch and display
+        - API Gateway > APIs > Resources - AI Photo Search > Click on GET > Edit Integration > Lambda function > `search-photos` > Lambda proxy integration: enable this > URL query string parameters: `q:method.request.querystring.q`
+
 5. Frontend
     - Write a frontend code to
         - [Index.html](./frontend/index.html): the main landing page
