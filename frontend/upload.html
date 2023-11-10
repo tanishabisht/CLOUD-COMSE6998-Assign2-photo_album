@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    <!-- API GATEWAY SDK -->
+    <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/enc-base64.js"></script>
+    <script type="text/javascript" src="lib/url-template/url-template.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+    <script type="text/javascript" src="apigClient.js"></script>
     <title>VisualVault | Upload</title>
 </head>
 <body>
@@ -65,9 +78,13 @@
 
 
 
-  
     <!-- JavaScript -->
     <script>
+
+        // Initializing API GATEWAY SDK
+        var apigClient = apigClientFactory.newClient({
+            apiKey: 'qQ2H0TLhzqWysxlSJN5v6cm2nnjmfzF2ZgaI5O32'
+        });
 
         // Initilaization - Image Upload
         const imageInput = document.getElementById('imageInput');
@@ -132,6 +149,7 @@
 
         function submitHandler() {
             const file = imageInput.files[0];
+            file.constructor = () => file;
             const customLabels = Array.from(allLabelInputs).map(input => input.value);
 
             // DISPLAY IMAGE
@@ -142,10 +160,32 @@
                     imageOutput.src = e.target.result;
                     imageOutputContainer.style.display = 'inline';
 
-                    data = {}
-                    data['file'] = reader.result
-                    data['labels'] = customLabels
-                    console.log(data)
+                    // data = {}
+                    // data['file'] = reader.result
+                    // data['labels'] = customLabels
+                    // console.log("file: ", file)
+                    // console.log("reader: ", reader)
+
+                    var params = {bucket: 'b2-imgs', filename: file.name};
+                    var body = file
+                    var additionalParams = {
+                        headers: {
+                            'x-amz-meta-customLabels': customLabels,
+                            'x-api-key': 'qQ2H0TLhzqWysxlSJN5v6cm2nnjmfzF2ZgaI5O32',
+                            'Access-Control-Allow-Origin': '*',
+                            "Access-Control-Allow-Headers": "*",
+                            "Access-Control-Allow-Methods": "GET,OPTIONS"
+                        }
+                    };
+
+                    apigClient.uploadBucketFilenamePut(params, body, additionalParams)
+                        .then(function(result){
+                            //This is where you would put a success callback
+                            console.log("result: ", result);
+                        }).catch( function(error){
+                            //This is where you would put an error callback
+                            console.log("error: ", error);
+                        });
                 };
                 
                 reader.readAsDataURL(file);
@@ -172,6 +212,10 @@
         }
         
     </script>
+
+
+<script>
+</script>
 
 </body>
 </html>
