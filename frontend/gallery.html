@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- API GATEWAY SDK -->
+    <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/enc-base64.js"></script>
+    <script type="text/javascript" src="lib/url-template/url-template.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+    <script type="text/javascript" src="apigClient.js"></script>
+
     <title>VisualVault | Gallery</title>
 </head>
 <body>
@@ -40,7 +54,7 @@
             <div class="input-group mb-3">
                 <input id="searchInput" type="text" class="form-control" placeholder="Search for a photo here" aria-label="Search for a photo here" aria-describedby="basic-addon2">
                 <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button">
+                    <button id="searchBtn" class="btn btn-outline-secondary" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                         </svg>
@@ -94,11 +108,21 @@
     <!-- JavaScript Code -->
     <script>
 
+        // Initializing API GATEWAY SDK
+        var apigClient = apigClientFactory.newClient();
+
         // initialize
+        const searchBtn = document.getElementById('searchBtn');
         const startBtn = document.getElementById('startVoiceBtn');
         const stopBtn = document.getElementById('stopVoiceBtn');
         const searchInput = document.getElementById('searchInput');
         let recognition;
+
+
+        // Add event listener on search button based on query
+        searchBtn.addEventListener('click', () => {
+            searchQueryHandler();
+        });
     
         // Add event listener on start voice button
         startBtn.addEventListener('click', () => {
@@ -138,6 +162,28 @@
         // function call on clicking stop voice button
         function stopVoiceRecognition() {
             recognition.stop();
+        }
+    
+        function searchQueryHandler() {
+            var params = {q: searchInput.value};
+            var body = {}
+            var additionalParams = {
+                headers: {
+                    'x-api-key': 'qQ2H0TLhzqWysxlSJN5v6cm2nnjmfzF2ZgaI5O32',
+                    'Access-Control-Allow-Origin': '*',
+                    "Access-Control-Allow-Headers": "*",
+                    "Access-Control-Allow-Methods": "GET,OPTIONS"
+                }
+            };
+
+            apigClient.searchGet(params, body, additionalParams)
+                .then(function(result){
+                    //This is where you would put a success callback
+                    console.log("result: ", result);
+                }).catch( function(error){
+                    //This is where you would put an error callback
+                    console.log("error: ", error);
+                });
         }
     </script>
 </body>

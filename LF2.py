@@ -92,10 +92,20 @@ def lambda_handler(event, context):
         print("key: ", key)
         images_from_key = response_from_opensearch(key)
         finalImages.append(images_from_key)
-
-    return {
-        'statusCode': 200,
+        
+    finalBody = json.dumps({
         'event': event,
         'keys': keys,
         'finalImages': finalImages
+    })
+
+    return {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "GET,OPTIONS"
+      },
+      "body": finalBody
     }
