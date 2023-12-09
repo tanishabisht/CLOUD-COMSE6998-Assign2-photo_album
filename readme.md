@@ -98,3 +98,8 @@
                 ]
             }
             ```
+
+
+
+
+- curl -i --location --request PUT 'https://a3bkr5s9v9.execute-api.us-east-1.amazonaws.com/gbm2/upload/b2-imgs/tree3.jpeg' --header 'Content-Type: image/jpeg' --data-binary '/Users/tanishabisht/Desktop/tree3.jpeg'

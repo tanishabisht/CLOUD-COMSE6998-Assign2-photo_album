@@ -18,6 +18,9 @@
     <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
     <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
     <script type="text/javascript" src="apigClient.js"></script>
+
+    <!-- AXIOS -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <title>VisualVault | Upload</title>
 </head>
 <body>
@@ -55,7 +58,7 @@
             </div>
 
             <!-- Input to add or remove Labels dynamically -->
-            <label for="imageInput" class="form-label text-info">Enter the custom labels (optional)</label>
+            <label for="customLabels" class="form-label text-info">Enter the custom labels (optional)</label>
             <div class="col-lg-6 mb-5">
                 <div class="input-group m-3">
                     <div class="input-group-prepend">
@@ -144,12 +147,15 @@
 
         // Add event listener on Submit Button
         submitBtn.addEventListener('click', () => {
+            console.log("submit btn clicked!!!")
             submitHandler();
         });
 
         function submitHandler() {
             const file = imageInput.files[0];
             file.constructor = () => file;
+            const filename = file.name;
+
             const customLabels = Array.from(allLabelInputs).map(input => input.value);
 
             // DISPLAY IMAGE
@@ -160,32 +166,90 @@
                     imageOutput.src = e.target.result;
                     imageOutputContainer.style.display = 'inline';
 
-                    // data = {}
-                    // data['file'] = reader.result
-                    // data['labels'] = customLabels
-                    // console.log("file: ", file)
-                    // console.log("reader: ", reader)
+                    
+                    // // ==== using api gateway sdk ====
+                    // var params = {bucket: 'b2-imgs', filename: filename, 'Content-Type': 'text/base64' };
+                    // var file = btoa(file);
+                    // // var fileExt = file.name.split('.')[1]
+                    // var additionalParams = {
+                    //     headers: {
+                    //         'x-amz-meta-customLabels': customLabels,
+                    //         'Access-Control-Allow-Origin': '*',
+                    //         "Access-Control-Allow-Headers": "*",
+                    //         "Access-Control-Allow-Methods": "PUT,OPTIONS",
+                    //         'Content-Type': 'text/base64'
+                    //     }
+                    // };
+                    // apigClient.uploadBucketFilenamePut(params, file, {})
+                    //     .then(function(result){
+                    //         console.log("result: ", result);
+                    //     }).catch( function(error){
+                    //         console.log("error: ", error);
+                    //     });
 
-                    var params = {bucket: 'b2-imgs', filename: file.name};
-                    var body = file
-                    var additionalParams = {
+
+                    // // ==== converting base64 to binary ====
+                    // const binaryData = atob(e.target.result.split(',')[1]);
+                    // const byteArray = new Uint8Array(binaryData.length);
+
+                    // for (let i = 0; i < binaryData.length; i++) {
+                    //     byteArray[i] = binaryData.charCodeAt(i);
+                    // }
+
+                    
+                    // filename = file.name;
+                    // const chaljabhai = new FormData();
+                    // chaljabhai.append('file', file);
+                    // chaljabhai.append('x-amz-meta-customLabels', customLabels);
+                    // chaljabhai.append('Content-Type', file.type);
+                    // console.log('hahahahahhahahaha', chaljabhai)
+
+
+                    // let requestOptions = {
+                    //     method: 'PUT',
+                    //     headers: {
+                    //         "x-amz-meta-customLabels": customLabels,
+                    //         "Content-Type": file.type,
+                    //     },
+                    //     body: file
+                    // };
+
+                    // fetch("https://a3bkr5s9v9.execute-api.us-east-1.amazonaws.com/gbm1/upload/b2-imgs/" + filename.toString(), {
+                    //     method: 'PUT',
+                    //     body: chaljabhai,
+                    // })
+                    //     .then(response => {
+                    //         console.log('response', response)
+                    //         console.log('response',  chaljabhai.get('file'))
+                    //     })
+                    //     .catch(error => console.log('error: ', error));
+
+                    console.log(e.target)
+                    console.log(e.target.result)
+
+                    // btoa_file = btoa(e.target.result)
+                    // atob_file = atob(btoa_file)
+                    // console.log(btoa_file)
+                    // console.log(JSON.parse(atob_file))
+
+                    const formData = new FormData();
+                    formData.append("image", file);
+
+                    const url = 'https://a3bkr5s9v9.execute-api.us-east-1.amazonaws.com/gbm2/upload/b2-imgs/' + filename.toString();
+                    const config = {
                         headers: {
-                            'x-amz-meta-customLabels': customLabels,
-                            'x-api-key': 'qQ2H0TLhzqWysxlSJN5v6cm2nnjmfzF2ZgaI5O32',
-                            'Access-Control-Allow-Origin': '*',
-                            "Access-Control-Allow-Headers": "*",
-                            "Access-Control-Allow-Methods": "GET,OPTIONS"
+                            "Content-Type": file.type,
+                            // 'Access-Control-Allow-Origin': '*'
+                            // "x-amz-meta-customLabels": customLabels
                         }
-                    };
+                    }
 
-                    apigClient.uploadBucketFilenamePut(params, body, additionalParams)
-                        .then(function(result){
-                            //This is where you would put a success callback
-                            console.log("result: ", result);
-                        }).catch( function(error){
-                            //This is where you would put an error callback
-                            console.log("error: ", error);
-                        });
+                    axios.put(url, file, config)
+                    .then(response => {
+                        console.log('response', response)
+                    })
+                    .catch(error => console.log('error: ', error));
+                        
                 };
                 
                 reader.readAsDataURL(file);
@@ -204,7 +268,7 @@
             const customLabels = Array.from(allLabelInputs).map(input => input.value);
 
             // Enable submitBtn if both the file and at least one label have a value
-            if (file && (customLabels.length > 0 && customLabels.some(label => label.trim() !== ""))) {
+            if (file && (customLabels.some(label => label.trim() !== ""))) {
                 submitBtn.removeAttribute('disabled');
             } else {
                 submitBtn.setAttribute('disabled', 'true');

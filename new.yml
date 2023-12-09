@@ -1,0 +1,73 @@
+# CloudFormation template format
+AWSTemplateFormatVersion: 2010-09-09 
+
+# Function ke parameters
+Parameters:
+  S3LambdaName:
+    Type: String
+    Default: photo-gallery-lambda-tb3061
+  S3FrontendBucketName:
+    Type: String
+    Default: photo-gallery-fe-tb3061
+  S3AssetsBucketName:
+    Type: String
+    Default: photo-images-tb3061
+  IndexLF1Name:
+    Type: String
+    Default: index-photos-lf1-tb3061
+  SearchLF2Name:
+    Type: String
+    Default: search-photos-lf2-tb3061
+
+# AWS resources that you want to create and configure
+Resources:
+  AssetsBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: IndexLambda1InvokePermissionForAssetsBucket
+    Properties:
+      BucketName: !Ref S3AssetsBucketName
+      AccessControl: PublicRead
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Function: !GetAtt [IndexLambda1, Arn]
+
+  AssetsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "PublicReadGetObject"
+            Effect: "Allow"
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::photo-images-tb3061/*"
+          - Sid: "ListObjectsInBucket"
+            Effect: "Allow"
+            Principal: "*"
+            Action: "s3:ListBucket"
+            Resource: "arn:aws:s3:::photo-images-tb3061"
+          - Sid: "AllObjectActions"
+            Effect: "Allow"
+            Principal: "*"
+            Action: "s3:*Object"
+            Resource: "arn:aws:s3:::photo-images-tb3061/*"
+      Bucket: !Ref S3AssetsBucketName
+
+
+  IndexLambda1InvokePermissionForAssetsBucket:
+    Type: AWS::Lambda::Permission # grants an AWS service or another account permission to use a function
+    DependsOn: IndexLambda1
+    Properties:
+      Action: lambda:InvokeFunction
+      # EXAMPLE 1: FunctionName: arn:aws:lambda:us-west-2:123456789012:function:my-function
+      # EXAMPLE 2: FunctionName: Arn:function:IndexLambda1
+      # EXAMPLE 3:
+      FunctionName:
+        Fn::GetAtt: # AWS function to get the attributes
+          - IndexLambda1
+          - Arn
+      Principal: s3.amazonaws.com # AWS service / account that invokes the function
+      SourceArn: # ARN of the AWS service / account that invokes the function
+        Fn::Sub: arn:aws:s3:::${S3AssetsBucketName} # AWS function for string substitution
